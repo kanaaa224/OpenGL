@@ -1,0 +1,9 @@
+GLUT（OpenGL Utility Toolkit）の導入方法
+
+1. そのプロジェクトに導入
+プロジェクト -> NuGetパッケージの管理 -> 「nupengl」を検索 -> 「nupengl.core」をインストール
+
+2. すべてのプロジェクトで使用可能にする
+glutランタイムを入手し、以下のパスに配置
+「C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include\GL\glut.h」
+「C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\lib\x86\glut32.lib」
