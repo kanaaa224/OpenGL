@@ -8,7 +8,7 @@ int windowPositionY = 100;
 int windowWidth  = 512;
 int windowHeight = 512;
 
-char windowTitle[] = "光と影";
+char windowTitle[] = "視点";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -20,25 +20,13 @@ void initialize(void) {
     // 光源の設定
     GLfloat lightPosition0[] = { -50.0, -50.0, 20.0, 1.0 }; // 光源0の座標
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
-
-    // 透視変換行列の設定
-    glMatrixMode(GL_PROJECTION); // 行列モードの設定（GL_PROJECTION : 透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
-    glLoadIdentity();            // 行列の初期化
-
-    gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far);
-
-    gluLookAt(
-        0.0, -100.0, 50.0, // 視点の位置
-        0.0, 100.0, 0.0,   // 視界の中心位置の参照点座標
-        0.0, 0.0, 1.0      // 視界の上方向のベクトル
-    );
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ground(void) {
-    double groundMaxX = 300.0;
-    double groundMaxY = 300.0;
+    double groundMaxX = 500.0;
+    double groundMaxY = 500.0;
 
     glColor3d(0.8, 0.8, 0.8); // 大地の色
 
@@ -61,6 +49,15 @@ void ground(void) {
 
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // バッファの消去
+
+
+    //////////////////////////////////////////////////
+    // 視点の定義
+    //////////////////////////////////////////////////
+
+    double viewX = 0.0;
+    double viewY = -200.0;
+    double viewZ = 20.0;
 
 
     //////////////////////////////////////////////////
@@ -105,9 +102,37 @@ void display(void) {
 
 
     //////////////////////////////////////////////////
+    // 視点
+    //////////////////////////////////////////////////
+
+    viewY += (-50.0 - viewY) * 0.25;
+
+
+    //////////////////////////////////////////////////
+    // 透視変換行列の設定
+    //////////////////////////////////////////////////
+
+    glMatrixMode(GL_PROJECTION); // 行列モードの設定（GL_PROJECTION：透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
+    glLoadIdentity();            // 行列の初期化
+    gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far);
+
+
+    //////////////////////////////////////////////////
+    // 視点の設定
+    //////////////////////////////////////////////////
+
+    gluLookAt(
+        0.0, viewY, viewZ,     // 視点の位置
+        0.0, viewY + 200, 0.0, // 視界の中心位置の参照点座標
+        0.0, 0.0, 1.0          // 視界の上方向のベクトル
+    );
+
+
+    //////////////////////////////////////////////////
     // モデルビュー変換行列の設定
     //////////////////////////////////////////////////
-    glMatrixMode(GL_MODELVIEW); // 行列モードの設定（GL_PROJECTION : 透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
+
+    glMatrixMode(GL_MODELVIEW); // 行列モードの設定（GL_PROJECTION：透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
     glLoadIdentity();           // 行列の初期化
     glViewport(0, 0, windowWidth, windowHeight);
 
@@ -130,7 +155,7 @@ void display(void) {
     glMaterialfv(GL_FRONT, GL_SPECULAR, ms_ruby.specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, &ms_ruby.shininess);
     glTranslated(0.0, 10.0, 20.0); // 平行移動値の設定
-    glutSolidSphere(4.0, 20, 20);  // 引数：(半径, Z軸まわりの分割数, Z軸に沿った分割数)
+    glutSolidSphere(4.0, 20, 20);  // 引数：半径、Z軸まわりの分割数、Z軸に沿った分割数
     glPopMatrix();
 
 
@@ -141,7 +166,7 @@ void display(void) {
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
     glTranslated(-20.0, 0.0, 20.0); // 平行移動値の設定
-    glutSolidCube(10.0);            // 引数：(一辺の長さ)
+    glutSolidCube(10.0);            // 引数：一辺の長さ
     glPopMatrix();
 
 
@@ -152,7 +177,7 @@ void display(void) {
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
     glTranslated(20.0, 100.0, 0.0);   // 平行移動値の設定
-    glutSolidCone(5.0, 10.0, 20, 20); // 引数：(半径, 高さ, Z軸まわりの分割数, Z軸に沿った分割数)
+    glutSolidCone(5.0, 10.0, 20, 20); // 引数：半径、高さ、Z軸まわりの分割数、Z軸に沿った分割数
     glPopMatrix();
 
 
@@ -219,7 +244,13 @@ void display(void) {
 
     ground(); // 地面
 
-    glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE)でダブルバッファリングを利用
+    glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE) でダブルバッファリングを利用
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void idle() {
+    glutPostRedisplay(); // glutDisplayFunc() を1回実行
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,6 +263,7 @@ int main(int argc, char* argv[]) {
 
     glutCreateWindow(windowTitle);
     glutDisplayFunc(display); // 描画時に呼び出される関数を指定
+    glutIdleFunc(idle);       // アイドル時に呼び出される関数を指定
 
     initialize();
 
