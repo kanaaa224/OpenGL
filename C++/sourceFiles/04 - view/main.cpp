@@ -22,7 +22,7 @@ void initialize(void) {
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
 
     // 透視変換行列の設定
-    glMatrixMode(GL_PROJECTION); // 行列モードの設定（GL_PROJECTION：透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
+    glMatrixMode(GL_PROJECTION); // 行列モードの設定（GL_PROJECTION : 透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
     glLoadIdentity();            // 行列の初期化
 
     gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far);
@@ -107,8 +107,7 @@ void display(void) {
     //////////////////////////////////////////////////
     // モデルビュー変換行列の設定
     //////////////////////////////////////////////////
-
-    glMatrixMode(GL_MODELVIEW); // 行列モードの設定（GL_PROJECTION：透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
+    glMatrixMode(GL_MODELVIEW); // 行列モードの設定（GL_PROJECTION : 透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
     glLoadIdentity();           // 行列の初期化
     glViewport(0, 0, windowWidth, windowHeight);
 
@@ -131,7 +130,7 @@ void display(void) {
     glMaterialfv(GL_FRONT, GL_SPECULAR, ms_ruby.specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, &ms_ruby.shininess);
     glTranslated(0.0, 10.0, 20.0); // 平行移動値の設定
-    glutSolidSphere(4.0, 20, 20);  // 引数：半径、Z軸まわりの分割数、Z軸に沿った分割数
+    glutSolidSphere(4.0, 20, 20);  // 引数：(半径, Z軸まわりの分割数, Z軸に沿った分割数)
     glPopMatrix();
 
 
@@ -142,7 +141,7 @@ void display(void) {
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
     glTranslated(-20.0, 0.0, 20.0); // 平行移動値の設定
-    glutSolidCube(10.0);            // 引数：一辺の長さ
+    glutSolidCube(10.0);            // 引数：(一辺の長さ)
     glPopMatrix();
 
 
@@ -153,7 +152,7 @@ void display(void) {
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
     glTranslated(20.0, 100.0, 0.0);   // 平行移動値の設定
-    glutSolidCone(5.0, 10.0, 20, 20); // 引数：半径、高さ、Z軸まわりの分割数、Z軸に沿った分割数
+    glutSolidCone(5.0, 10.0, 20, 20); // 引数：(半径, 高さ, Z軸まわりの分割数, Z軸に沿った分割数)
     glPopMatrix();
 
 
@@ -220,7 +219,7 @@ void display(void) {
 
     ground(); // 地面
 
-    glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE) でダブルバッファリングを利用
+    glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE)でダブルバッファリングを利用
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
