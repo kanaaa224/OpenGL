@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sourceFiles\02 - object\main.cpp">
+    <ClCompile Include="sourceFiles\03 - light and shadow\main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
