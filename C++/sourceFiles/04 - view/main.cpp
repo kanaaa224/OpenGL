@@ -114,7 +114,7 @@ void display(void) {
 
     glMatrixMode(GL_PROJECTION); // 行列モードの設定（GL_PROJECTION：透視変換行列の設定、GL_MODELVIEW：モデルビュー変換行列）
     glLoadIdentity();            // 行列の初期化
-    gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far);
+    gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far)
 
 
     //////////////////////////////////////////////////
@@ -242,7 +242,12 @@ void display(void) {
     glDisable(GL_LIGHTING);
 
 
-    ground(); // 地面
+    //////////////////////////////////////////////////
+    // 地面（地平線）
+    //////////////////////////////////////////////////
+
+    ground();
+
 
     glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE) でダブルバッファリングを利用
 };
