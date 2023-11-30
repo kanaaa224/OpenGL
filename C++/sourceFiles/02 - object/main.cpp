@@ -17,7 +17,7 @@ void initialize(void) {
 
     glEnable(GL_DEPTH_TEST); // デプスバッファを使用 | glutInitDisplayMode() で GLUT_DEPTH を指定する
 
-    gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far);
+    gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far)
 
     gluLookAt(
         0.0, -100.0, 50.0, // 視点の位置
@@ -54,6 +54,7 @@ void ground(void) {
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // バッファの消去
 
+
     //////////////////////////////////////////////////
     // 球
     //////////////////////////////////////////////////
@@ -61,7 +62,7 @@ void display(void) {
     glPushMatrix();
     glColor3d(1.0, 0.0, 0.0);      // 色の設定
     glTranslated(0.0, 10.0, 20.0); // 平行移動値の設定
-    glutSolidSphere(4.0, 20, 20);  // 引数：(半径, Z軸まわりの分割数, Z軸に沿った分割数)
+    glutSolidSphere(4.0, 20, 20);  // 引数：半径、Z軸まわりの分割数、Z軸に沿った分割数
     glPopMatrix();
 
 
@@ -72,7 +73,7 @@ void display(void) {
     glPushMatrix();
     glColor3d(0.0, 1.0, 0.0);       // 色の設定
     glTranslated(-20.0, 0.0, 20.0); // 平行移動値の設定
-    glutSolidCube(10.0);            // 引数：(一辺の長さ)
+    glutSolidCube(10.0);            // 引数：一辺の長さ
     glPopMatrix();
 
 
@@ -83,7 +84,7 @@ void display(void) {
     glPushMatrix();
     glColor3d(0.0, 0.0, 1.0);         // 色の設定
     glTranslated(20.0, 100.0, 0.0);   // 平行移動値の設定
-    glutSolidCone(5.0, 10.0, 20, 20); // 引数：(半径, 高さ, Z軸まわりの分割数, Z軸に沿った分割数)
+    glutSolidCone(5.0, 10.0, 20, 20); // 引数：半径、高さ、Z軸まわりの分割数、Z軸に沿った分割数
     glPopMatrix();
 
 
@@ -102,6 +103,7 @@ void display(void) {
       { 2.0, 2.0, 30.0 },
       { 0.0, 2.0, 30.0 }
     };
+
     // 面の定義
     int face[][4] = {
       { 0, 1, 2, 3 },
@@ -111,6 +113,7 @@ void display(void) {
       { 4, 5, 1, 0 },
       { 3, 2, 6, 7 }
     };
+
     glPushMatrix();
     glColor3d(0.0, 1.0, 1.0);      // 色の設定
     glTranslated(30.0, 50.0, 0.0); // 平行移動値の設定
@@ -124,9 +127,15 @@ void display(void) {
 
     glEnd();
 
-    ground(); // 地面
 
-    glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE)でダブルバッファリングを利用
+    //////////////////////////////////////////////////
+    // 地面
+    //////////////////////////////////////////////////
+
+    ground();
+
+
+    glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE) でダブルバッファリングを利用
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
