@@ -15,7 +15,7 @@ void initialize(void) {
 
     glEnable(GL_DEPTH_TEST); // デプスバッファを使用 | glutInitDisplayMode() で GLUT_DEPTH を指定する
 
-    gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far);
+    gluPerspective(30.0, (double)windowWidth / (double)windowHeight, 0.1, 1000.0); // 透視投影法の視体積 | gluPerspactive(th, w/h, near, far)
 
     gluLookAt(
         0.0, -100.0, 25.0, // 視点の位置
@@ -48,9 +48,15 @@ void ground(void) {
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // バッファの消去
 
+
+    //////////////////////////////////////////////////
+    // 地面（地平線）
+    //////////////////////////////////////////////////
+
     ground();
 
-    glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE)でダブルバッファリングを利用
+
+    glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE) でダブルバッファリングを利用
 };
 
 int main(int argc, char* argv[]) {
