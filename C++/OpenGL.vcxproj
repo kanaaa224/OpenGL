@@ -19,10 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ex - obj File\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\ex - obj File\main.hpp" />
+    <ClCompile Include="src\ex - obj File 3\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

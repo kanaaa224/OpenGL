@@ -1,5 +1,10 @@
 ﻿#include <stdio.h>
+
+#define _USE_MATH_DEFINES
 #include <math.h>
+
+#define DEGREE_RADIAN(_deg) (M_PI * (_deg) / 180.0f) // degree -> radian
+#define RADIAN_DEGREE(_rad) ((_rad) * 180.0f / M_PI) // radian -> degree
 
 #include <time.h>   // 日付時刻関連
 #include <iostream> // 入出力関連
@@ -9,7 +14,6 @@
 #include <vector>   // 動的配列（要素を追加したり削除したり）
 #include <sstream>  // 文字列ストリーム操作（文字列から数値への変換や数値から文字列への変換）
 
-#define _USE_MATH_DEFINES
 using std::string;
 using std::to_string;
 
@@ -30,10 +34,10 @@ using std::to_string;
 int windowPositionX = 100;
 int windowPositionY = 100;
 
-int windowWidth  = 512;
-int windowHeight = 512;
+int windowWidth  = 1280;
+int windowHeight = 720;
 
-char windowTitle[] = "objファイルからモデルをロード";
+char windowTitle[] = "objファイルからモデルをロードし斜方投射 [ WASD: 方向角度 / QE: 強さ / M: objモデルを発射 / N: 球を発射 / V: 視点切り替え ]";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -206,7 +210,6 @@ void parseObjFileData(std::vector<std::string> objFileData) {
             currentIndex = 0;
             slashCounter = 0;
 
-
             f++;
         }
     }
@@ -226,11 +229,47 @@ void initialize(void) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void drawString(int x, int y, char* string, void* font) {
+    int len, i;
+    glRasterPos2f(x, y);
+    len = (int)strlen(string);
+    for (i = 0; i < len; i++) {
+        glutBitmapCharacter(font, string[i]);
+    }
+}
+
+int list;
+
+void drawText(int x, int y, char* string) {
+    glPushAttrib(GL_ENABLE_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 100, 0, 100);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glColor3f(0.0, 0.0, 0.0);
+    glCallList(list);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glPopAttrib();
+    glMatrixMode(GL_MODELVIEW);
+    list = glGenLists(1);
+    glNewList(list, GL_COMPILE);
+    drawString(x, y, string, GLUT_BITMAP_TIMES_ROMAN_24);
+    glEndList();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void drawGround(void) {
     double groundMaxX = 500.0;
     double groundMaxY = 500.0;
 
-    glColor3d(0.8, 0.8, 0.8); // 大地の色
+    glColor3d(0.8, 0.8, 0.8);    // グリッド線の色
+    glTranslated(0.0, 0.0, 0.0); // 平行移動値の設定
 
     glBegin(GL_LINES);
 
@@ -252,6 +291,20 @@ void drawGround(void) {
 double viewX = 0.0;
 double viewY = -200.0;
 double viewZ = 20.0;
+
+struct Model {
+    double x, y, z;        // 位置
+    double vx, vy, vz, vg; // 移動量、重力加速度（vector）
+    double ix, iy, iz;     // 初期位置
+};
+
+std::vector<Model> obj_models;
+std::vector<Model> sphere_models;
+std::vector<Model> guide_models;
+
+int launchAngleX   = 90; // 打ち出すX軸（横方向）のアングル
+int launchAngleY   = 45; // 打ち出すY軸（縦方向）のアングル
+int launchStrength = 0;  // 打ち出し強さ
 
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // バッファの消去
@@ -302,7 +355,7 @@ void display(void) {
     // 視点の移動
     //////////////////////////////////////////////////
 
-    viewY += (-50.0 - viewY) * 0.001;
+    //viewY += (-50.0 - viewY) * 0.001;
 
 
     //////////////////////////////////////////////////
@@ -319,9 +372,9 @@ void display(void) {
     //////////////////////////////////////////////////
 
     gluLookAt(
-        0.0, viewY, viewZ,     // 視点の位置
-        0.0, viewY + 200, 0.0, // 視界の中心位置の参照点座標
-        0.0, 0.0, 1.0          // 視界の上方向のベクトル
+        viewX, viewY, viewZ, // 視点の位置
+        0.0, 0.0, 0.0,       // 視界の中心位置の参照点座標
+        0.0, 0.0, 1.0        // 視界の上方向のベクトル
     );
 
 
@@ -335,6 +388,45 @@ void display(void) {
 
 
     //////////////////////////////////////////////////
+    // 地面（グリッドの地平線）
+    //////////////////////////////////////////////////
+
+    drawGround();
+
+
+    //////////////////////////////////////////////////
+    // テキスト描画
+    //////////////////////////////////////////////////
+    char t_char[100];
+    char t_char2[100];
+
+    strcpy_s(t_char2, "Number of obj file models: ");
+    sprintf_s(t_char, "%d", obj_models.size());
+    strcat_s(t_char2, t_char);
+    drawText(1, 95, t_char2);
+
+    strcpy_s(t_char2, "Number of sphere models: ");
+    sprintf_s(t_char, "%d", sphere_models.size());
+    strcat_s(t_char2, t_char);
+    drawText(1, 90, t_char2);
+
+    strcpy_s(t_char2, "Launch Angle X: ");
+    sprintf_s(t_char, "%d", launchAngleX);
+    strcat_s(t_char2, t_char);
+    drawText(1, 80, t_char2);
+
+    strcpy_s(t_char2, "Launch Angle Y: ");
+    sprintf_s(t_char, "%d", launchAngleY);
+    strcat_s(t_char2, t_char);
+    drawText(1, 75, t_char2);
+
+    strcpy_s(t_char2, "Launch strength: ");
+    sprintf_s(t_char, "%d", launchStrength);
+    strcat_s(t_char2, t_char);
+    drawText(1, 70, t_char2);
+
+
+    //////////////////////////////////////////////////
     // 陰影ON
     //////////////////////////////////////////////////
 
@@ -343,27 +435,87 @@ void display(void) {
 
 
     //////////////////////////////////////////////////
-    // objファイルのモデルを描画
+    // objファイルのモデルの描画、移動処理
     //////////////////////////////////////////////////
 
-    glPushMatrix();
+    for (int i = 0; i < obj_models.size(); i++) {
+        obj_models[i].x += obj_models[i].vx;
+        obj_models[i].y += obj_models[i].vy;
+        obj_models[i].z += obj_models[i].vz;
 
-    glColor3d(0.0, 0.0, 0.0); // 色の設定
-    glTranslated(0, 50, 0);   // 平行移動値の設定
+        glPushMatrix();
 
-    glBegin(GL_TRIANGLES);
+        glTranslated(obj_models[i].x, obj_models[i].y, obj_models[i].z); // 移動値
 
-    for (int i = 0; i < COUNTOF(face); i++) {
-        for (int j = 0; j < 9; j++) {
-                 if (j % 3 == 2) glNormal3f(normal[face[i][j]][0], normal[face[i][j]][1], normal[face[i][j]][2]);
-            else if (j % 3 == 1) glTexCoord2f(uv[face[i][j]][0], uv[face[i][j]][1]);
-            else if (j % 3 == 0) glVertex3dv(vertex[face[i][j]]);
+        glMaterialfv(GL_FRONT, GL_AMBIENT, ms_jade.ambient);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, ms_jade.diffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, ms_jade.specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, &ms_jade.shininess);
+
+        glBegin(GL_TRIANGLES);
+
+        for (int f = 0; f < COUNTOF(face); f++) {
+            for (int d = 0; d < 9; d++) {
+                if (d % 3 == 2) glNormal3f(normal[face[f][d]][0], normal[face[f][d]][1], normal[face[f][d]][2]);
+                else if (d % 3 == 1) glTexCoord2f(uv[face[f][d]][0], uv[face[f][d]][1]);
+                else if (d % 3 == 0) glVertex3dv(vertex[face[f][d]]);
+            }
+        }
+
+        glEnd();
+
+        glPopMatrix();
+
+        if (obj_models[i].vz < 0.0) obj_models[i].vz += -0.01;
+        if (obj_models[i].vz > 0.0) obj_models[i].vz -= 0.01;
+
+        if (obj_models[i].z < -0.1) {
+            obj_models[i].vx = 0.0;
+            obj_models[i].vy = 0.0;
+            obj_models[i].vz = 0.0;
         }
     }
 
-    glPopMatrix();
 
-    glEnd();
+    //////////////////////////////////////////////////
+    // ボールの描画、移動処理
+    //////////////////////////////////////////////////
+
+    for (int i = 0; i < sphere_models.size(); i++) {
+        sphere_models[i].x += sphere_models[i].vx;
+        sphere_models[i].y += sphere_models[i].vy;
+        sphere_models[i].z += sphere_models[i].vz;
+
+        glPushMatrix();
+
+        glTranslated(sphere_models[i].x, sphere_models[i].y, sphere_models[i].z); // 移動値
+
+        glMaterialfv(GL_FRONT, GL_AMBIENT, ms_ruby.ambient);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, ms_ruby.diffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, ms_ruby.specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, &ms_ruby.shininess);
+
+        glutSolidSphere(4.0, 20, 20); // 半径、Z軸まわりの分割数、Z軸に沿った分割数
+
+        glPopMatrix();
+
+        /*if (sphere_models[i].vx < 0.0) sphere_models[i].vx += -0.005;
+        if (sphere_models[i].vx > 0.0) sphere_models[i].vx -= 0.005;
+        if (sphere_models[i].vy < 0.0) sphere_models[i].vy += -0.005;
+        if (sphere_models[i].vy > 0.0) sphere_models[i].vy -= 0.005;*/
+        if (sphere_models[i].vz < 0.0) sphere_models[i].vz += -0.01;
+        if (sphere_models[i].vz > 0.0) sphere_models[i].vz -= 0.01;
+
+        if (sphere_models[i].z < -0.1) {
+            sphere_models[i].vx = 0.0;
+            sphere_models[i].vy = 0.0;
+            sphere_models[i].vz = 0.0;
+        }
+
+        //for (int h = 0; h < sphere_models.size(); h++) {
+        //    //
+        //}
+    }
 
 
     //////////////////////////////////////////////////
@@ -371,13 +523,39 @@ void display(void) {
     //////////////////////////////////////////////////
 
     glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT0);
 
 
     //////////////////////////////////////////////////
-    // 地面（グリッドの地平線）
+    // ガイドの描画
     //////////////////////////////////////////////////
 
-    drawGround();
+    for (int i = 0; i < guide_models.size(); i++) {
+        glPushMatrix();
+
+        glTranslated(guide_models[i].x, guide_models[i].y, guide_models[i].z); // 移動値
+
+        glColor3d(0.0, 0.0, 0.0);
+
+        glutSolidSphere(1.0, 20, 20);
+
+        glPopMatrix();
+    }
+
+
+    //////////////////////////////////////////////////
+    // ガイドの生成
+    //////////////////////////////////////////////////
+
+    guide_models.clear();
+
+    for (int i = 0; i < round(launchStrength); i++) {
+        Model model;
+        model.x = 0.0;
+        model.y = 0.0;
+        model.z = 0.0;
+        guide_models.push_back(model);
+    }
 
 
     glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE) でダブルバッファリングを利用
@@ -391,6 +569,82 @@ void idle() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void keyboard(unsigned char key, int x, int y) {
+    switch (key) {
+    case 'w':
+        if (launchAngleY > 0) launchAngleY--;
+        break;
+
+    case 's':
+        if (launchAngleY < 180) launchAngleY++;
+        break;
+
+    case 'd':
+        if (launchAngleX > 0) launchAngleX--;
+        break;
+
+    case 'a':
+        if (launchAngleX < 180) launchAngleX++;
+        break;
+
+    case 'q':
+        launchStrength++;
+        break;
+
+    case 'e':
+        launchStrength--;
+        break;
+
+    case '0':
+        exit(0);
+        break;
+
+    case 'x': {
+        Model model;
+
+        model.x = 0.0;
+        model.y = 0.0;
+        model.z = 0.0;
+
+        model.vx = cosf(DEGREE_RADIAN(launchAngleX)) * cosf(DEGREE_RADIAN(launchAngleY));
+        model.vy = sinf(DEGREE_RADIAN(launchAngleX)) * cosf(DEGREE_RADIAN(launchAngleY));
+        model.vz = sinf(DEGREE_RADIAN(launchAngleY));
+        model.vg = 0.0;
+
+        model.ix = model.x;
+        model.iy = model.y;
+        model.iz = model.z;
+
+        sphere_models.push_back(model);
+        break;
+    }
+
+    case 'z': {
+        Model model;
+
+        model.x = 0.0;
+        model.y = 0.0;
+        model.z = 0.0;
+        
+        model.vx = cosf(DEGREE_RADIAN(launchAngleX)) * cosf(DEGREE_RADIAN(launchAngleY));
+        model.vy = sinf(DEGREE_RADIAN(launchAngleX)) * cosf(DEGREE_RADIAN(launchAngleY));
+        model.vz = sinf(DEGREE_RADIAN(launchAngleY));
+
+        model.ix = model.x;
+        model.iy = model.y;
+        model.iz = model.z;
+
+        obj_models.push_back(model);
+        break;
+    }
+
+    default:
+        break;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char* argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
@@ -398,8 +652,9 @@ int main(int argc, char* argv[]) {
     glutInitWindowSize(windowWidth, windowHeight);
     glutCreateWindow(windowTitle);
 
-    glutDisplayFunc(display); // 描画時に呼び出される関数
-    glutIdleFunc(idle);       // アイドル時に呼び出される関数
+    glutDisplayFunc(display);   // 描画時に呼び出される関数
+    glutIdleFunc(idle);         // アイドル時に呼び出される関数
+    glutKeyboardFunc(keyboard); // キーボード入力関数
 
     parseObjFileData(getFileContents("./res/model.obj")); // objファイルからモデルデータをロード
 
