@@ -401,7 +401,7 @@ int main(int argc, char* argv[]) {
     glutDisplayFunc(display); // 描画時に呼び出される関数
     glutIdleFunc(idle);       // アイドル時に呼び出される関数
 
-    parseObjFileData(getFileContents("./res/model.obj")); // objファイルからモデルデータをロード
+    parseObjFileData(getFileContents("./assets/model.obj")); // objファイルからモデルデータをロード
 
     initialize();
 
