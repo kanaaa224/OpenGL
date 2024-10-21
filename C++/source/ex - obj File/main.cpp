@@ -29,9 +29,8 @@ using std::to_string;
 
 int windowPositionX = 100;
 int windowPositionY = 100;
-
-int windowWidth  = 512;
-int windowHeight = 512;
+int windowWidth     = 512;
+int windowHeight    = 512;
 
 char windowTitle[] = "objファイルからモデルをロード";
 
@@ -64,7 +63,6 @@ GLdouble normal[100][3]; // 法線ベクトル
 int      face[100][9];   // 面の情報
 
 void parseObjFileData(std::vector<std::string> objFileData) {
-
     std::string valueA, valueB, valueC, valueD; // 行からスペースで区切られた文字列を順に格納
 
     std::string key;
@@ -230,7 +228,7 @@ void drawGround(void) {
     double groundMaxX = 500.0;
     double groundMaxY = 500.0;
 
-    glColor3d(0.8, 0.8, 0.8); // 大地の色
+    glColor3d(0.8, 0.8, 0.8); // グリッド線の色
 
     glBegin(GL_LINES);
 

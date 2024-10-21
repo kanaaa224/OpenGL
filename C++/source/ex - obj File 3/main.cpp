@@ -33,11 +33,10 @@ using std::to_string;
 
 int windowPositionX = 100;
 int windowPositionY = 100;
+int windowWidth     = 1280;
+int windowHeight    = 720;
 
-int windowWidth  = 1280;
-int windowHeight = 720;
-
-char windowTitle[] = "objファイルからモデルをロードし斜方投射 [ WASD: 方向角度 / QE: 強さ / M: objモデルを発射 / N: 球を発射 / V: 視点切り替え ]";
+char windowTitle[] = "objファイルからモデルをロードし斜方投射 [ WASD: 方向角度 / N: objモデルを発射 / M: 球を発射 / Z: リセット ]"; // TODO: "/ QE: 強さ"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -68,7 +67,6 @@ GLdouble normal[100][3]; // 法線ベクトル
 int      face[100][9];   // 面の情報
 
 void parseObjFileData(std::vector<std::string> objFileData) {
-
     std::string valueA, valueB, valueC, valueD; // 行からスペースで区切られた文字列を順に格納
 
     std::string key;
@@ -304,7 +302,7 @@ std::vector<Model> guide_models;
 
 int launchAngleX   = 90; // 打ち出すX軸（横方向）のアングル
 int launchAngleY   = 45; // 打ち出すY軸（縦方向）のアングル
-int launchStrength = 0;  // 打ち出し強さ
+int launchStrength = 0;  // 打ち出す強さ
 
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // バッファの消去
@@ -397,6 +395,7 @@ void display(void) {
     //////////////////////////////////////////////////
     // テキスト描画
     //////////////////////////////////////////////////
+
     char t_char[100];
     char t_char2[100];
 
@@ -420,10 +419,10 @@ void display(void) {
     strcat_s(t_char2, t_char);
     drawText(1, 75, t_char2);
 
-    strcpy_s(t_char2, "Launch strength: ");
+    /*strcpy_s(t_char2, "Launch strength: ");
     sprintf_s(t_char, "%d", launchStrength);
     strcat_s(t_char2, t_char);
-    drawText(1, 70, t_char2);
+    drawText(1, 70, t_char2);*/
 
 
     //////////////////////////////////////////////////
@@ -530,7 +529,7 @@ void display(void) {
     // ガイドの描画
     //////////////////////////////////////////////////
 
-    for (int i = 0; i < guide_models.size(); i++) {
+    /*for (int i = 0; i < guide_models.size(); i++) {
         glPushMatrix();
 
         glTranslated(guide_models[i].x, guide_models[i].y, guide_models[i].z); // 移動値
@@ -555,7 +554,7 @@ void display(void) {
         model.y = 0.0;
         model.z = 0.0;
         guide_models.push_back(model);
-    }
+    }*/
 
 
     glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE) でダブルバッファリングを利用
@@ -587,19 +586,21 @@ void keyboard(unsigned char key, int x, int y) {
         if (launchAngleX < 180) launchAngleX++;
         break;
 
-    case 'q':
+    /*case 'q':
         launchStrength++;
         break;
 
     case 'e':
         launchStrength--;
-        break;
+        break;*/
 
-    case '0':
-        exit(0);
+    case 'z': {
+        sphere_models.clear();
+        obj_models.clear();
         break;
+    }
 
-    case 'x': {
+    case 'm': {
         Model model;
 
         model.x = 0.0;
@@ -619,7 +620,7 @@ void keyboard(unsigned char key, int x, int y) {
         break;
     }
 
-    case 'z': {
+    case 'n': {
         Model model;
 
         model.x = 0.0;
@@ -637,6 +638,10 @@ void keyboard(unsigned char key, int x, int y) {
         obj_models.push_back(model);
         break;
     }
+
+    case '0':
+        exit(0);
+        break;
 
     default:
         break;

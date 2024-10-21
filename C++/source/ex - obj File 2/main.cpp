@@ -29,11 +29,10 @@ using std::to_string;
 
 int windowPositionX = 100;
 int windowPositionY = 100;
+int windowWidth     = 1280;
+int windowHeight    = 720;
 
-int windowWidth  = 1280;
-int windowHeight = 720;
-
-char windowTitle[] = "objファイルからモデルをロード";
+char windowTitle[] = "objファイルからモデルをロード [ WASDQE: カメラ移動 / MN: 球とobjモデルを生成 / X: モデルを自動生成 / Z: リセット ]";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -64,7 +63,6 @@ GLdouble normal[100][3]; // 法線ベクトル
 int      face[100][9];   // 面の情報
 
 void parseObjFileData(std::vector<std::string> objFileData) {
-
     std::string valueA, valueB, valueC, valueD; // 行からスペースで区切られた文字列を順に格納
 
     std::string key;
@@ -265,8 +263,8 @@ void drawGround(void) {
     double groundMaxX = 500.0;
     double groundMaxY = 500.0;
 
-    glColor3d(0.8, 0.8, 0.8); // グリッド線の色
-    glTranslated(0.0, 0.0, 0.0);    // 平行移動値の設定
+    glColor3d(0.8, 0.8, 0.8);    // グリッド線の色
+    glTranslated(0.0, 0.0, 0.0); // 平行移動値の設定
 
     glBegin(GL_LINES);
 
@@ -391,6 +389,7 @@ void display(void) {
     //////////////////////////////////////////////////
     // テキスト描画
     //////////////////////////////////////////////////
+
     char t_char[100];
     char t_char2[100];
 
@@ -403,26 +402,6 @@ void display(void) {
     sprintf_s(t_char, "%d", sphere_models.size());
     strcat_s(t_char2, t_char);
     drawText(1, 90, t_char2);
-
-    /*strcpy_s(t_char2, "Launch direction x: ");
-    sprintf_s(t_char, "%d", 0);
-    strcat_s(t_char2, t_char);
-    drawText(1, 80, t_char2);
-
-    strcpy_s(t_char2, "Launch direction y: ");
-    sprintf_s(t_char, "%d", 0);
-    strcat_s(t_char2, t_char);
-    drawText(1, 75, t_char2);
-
-    strcpy_s(t_char2, "Launch angle: ");
-    sprintf_s(t_char, "%d", 0);
-    strcat_s(t_char2, t_char);
-    drawText(1, 70, t_char2);
-
-    strcpy_s(t_char2, "Launch speed: ");
-    sprintf_s(t_char, "%d", 0);
-    strcat_s(t_char2, t_char);
-    drawText(1, 65, t_char2);*/
 
 
     //////////////////////////////////////////////////
@@ -513,31 +492,37 @@ void display(void) {
     glDisable(GL_LIGHT0);
 
 
+    //////////////////////////////////////////////////
+    // 球とobjモデルの自動生成
+    //////////////////////////////////////////////////
+
+    if (state) {
+        Model model;
+        model.x = 0.0;
+        model.y = 0.0;
+        model.z = 0.0;
+        model.vx = (((rand() % 10 + 1) + -5.0) / 10.0);
+        model.vy = (((rand() % 10 + 1) + -5.0) / 10.0);
+        model.vz = (((rand() % 10 + 1) + -5.0) / 10.0);
+        model.ix = model.x;
+        model.iy = model.y;
+        model.iz = model.z;
+        sphere_models.push_back(model);
+
+        model.x = 0.0;
+        model.y = 0.0;
+        model.z = 0.0;
+        model.vx = (((rand() % 10 + 1) + -5.0) / 10.0);
+        model.vy = (((rand() % 10 + 1) + -5.0) / 10.0);
+        model.vz = (((rand() % 10 + 1) + -5.0) / 10.0);
+        model.ix = model.x;
+        model.iy = model.y;
+        model.iz = model.z;
+        obj_models.push_back(model);
+    }
+
+
     glutSwapBuffers(); // glutInitDisplayMode(GLUT_DOUBLE) でダブルバッファリングを利用
-
-
-    Model model;
-    model.x = 0.0;
-    model.y = 0.0;
-    model.z = 0.0;
-    model.vx = (((rand() % 10 + 1) + -5.0) / 10.0);
-    model.vy = (((rand() % 10 + 1) + -5.0) / 10.0);
-    model.vz = (((rand() % 10 + 1) + -5.0) / 10.0);
-    model.ix = model.x;
-    model.iy = model.y;
-    model.iz = model.z;
-    sphere_models.push_back(model);
-
-    model.x = 0.0;
-    model.y = 0.0;
-    model.z = 0.0;
-    model.vx = (((rand() % 10 + 1) + -5.0) / 10.0);
-    model.vy = (((rand() % 10 + 1) + -5.0) / 10.0);
-    model.vz = (((rand() % 10 + 1) + -5.0) / 10.0);
-    model.ix = model.x;
-    model.iy = model.y;
-    model.iz = model.z;
-    obj_models.push_back(model);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -574,11 +559,19 @@ void keyboard(unsigned char key, int x, int y) {
         viewZ--;
         break;
 
-    case '0':
-        exit(0);
+    case 'z': {
+        sphere_models.clear();
+        obj_models.clear();
         break;
+    }
 
     case 'x': {
+        if (state) state = 0;
+        else       state = 1;
+        break;
+    }
+
+    case 'm': {
         Model model;
         model.x = 0.0;
         model.y = 0.0;
@@ -593,7 +586,7 @@ void keyboard(unsigned char key, int x, int y) {
         break;
     }
 
-    case 'z': {
+    case 'n': {
         Model model;
         model.x = 0.0;
         model.y = 0.0;
@@ -607,6 +600,10 @@ void keyboard(unsigned char key, int x, int y) {
         obj_models.push_back(model);
         break;
     }
+
+    case '0':
+        exit(0);
+        break;
 
     default:
         break;
