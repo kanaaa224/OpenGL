@@ -6,6 +6,9 @@
 # ライブラリ
 libraries/
 
+# アセット
+assets/
+
 # User-specific files
 *.rsuser
 *.suo
