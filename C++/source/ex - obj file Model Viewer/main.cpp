@@ -6,8 +6,6 @@
 #include <map>
 
 #include <GL/glut.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../libraries/stb/stb_image.h"
@@ -286,7 +284,7 @@ void drawOBJ(const std::vector<Vertex>& vertices, const std::vector<Normal>& nor
 
 float angleX = 0.0f;  // X軸回転角度
 float angleY = 0.0f;  // Y軸回転角度
-float zoom = -5.0f; // ズームの距離（視点からの距離）
+float zoom   = -5.0f; // ズームの距離（視点からの距離）
 
 int lastX = 0, lastY = 0; // 最後のマウス位置
 bool isDragging = false;  // ドラッグ状態かどうか
@@ -405,6 +403,10 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(500, 500);
     glutCreateWindow("OpenGL - Model Viewer");
+    glutDisplayFunc(display);
+    glutKeyboardFunc(keyboard);
+    glutMotionFunc(mouseMotion);
+    glutMouseFunc(mouseButton);
 
     initialize();
 
@@ -413,10 +415,6 @@ int main(int argc, char** argv) {
 
     if (!loadOBJ(modelPath, vertices, normals, texCoords, faces)) return -1;
 
-    glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutMotionFunc(mouseMotion);
-    glutMouseFunc(mouseButton);
     glutMainLoop();
 
     return 0;
