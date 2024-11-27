@@ -282,8 +282,8 @@ void drawOBJ(const std::vector<Vertex>& vertices, const std::vector<Normal>& nor
     }
 }
 
-float angleX = 0.0f;  // X軸回転角度
-float angleY = 0.0f;  // Y軸回転角度
+float angleX =  0.0f; // X軸回転角度
+float angleY =  0.0f; // Y軸回転角度
 float zoom   = -5.0f; // ズームの距離（視点からの距離）
 
 int lastX = 0, lastY = 0; // 最後のマウス位置
