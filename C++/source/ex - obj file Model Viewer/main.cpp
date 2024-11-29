@@ -286,19 +286,15 @@ float angleX =  0.0f; // X軸回転角度
 float angleY =  0.0f; // Y軸回転角度
 float zoom   = -5.0f; // ズームの距離（視点からの距離）
 
-int lastX = 0, lastY = 0; // 最後のマウス位置
-bool isDragging = false;  // ドラッグ状態かどうか
+int lastX = 0, lastY = 0;         // 最後のマウス位置
+bool isChangePerspective = false; // 視点変更中かどうか
+bool isZooming           = false; // ズーム中かどうか
 
 // オブジェクトモデルの描画
 void drawObjects() {
     glPushMatrix();
 
-    glRotatef(angleX, 1.0f, 0.0f, 0.0f);
-    glRotatef(angleY, 0.0f, 1.0f, 0.0f);
-
-    //glColor3f(1.0f, 0.0f, 0.0f); // オブジェクトの色（赤）
-
-    //glutSolidTeapot(1.0);
+    //glutSolidTeapot(0.75);
 
     drawOBJ(vertices, normals, texCoords, faces);
 
@@ -307,47 +303,71 @@ void drawObjects() {
 
 // マウス モーション イベント
 void mouseMotion(int x, int y) {
-    // マウスの動きによる視点移動
-    if (isDragging) {
-        // マウスを上下に動かすことでズーム
-        int deltaY = y - lastY;
-        zoom += deltaY * 0.05f;             // ズーム感度を調整
-        if (zoom > -1.0f)   zoom = -1.0f;   // ズームの最小値を制限
-        if (zoom < -100.0f) zoom = -100.0f; // ズームの最大値を制限
-        lastY = y;
-    }
-    else {
+    if (isChangePerspective) {
         int dx = x - lastX;  // 横の動き
         int dy = y - lastY;  // 縦の動き
 
         // マウスの動きに応じて回転角度を調整
-        angleX += dy * 0.2f; // 縦方向の回転
-        angleY += dx * 0.2f; // 横方向の回転
+        angleX += dy * 0.5f; // 縦方向の回転
+        angleY += dx * 0.5f; // 横方向の回転
 
         lastX = x;
+        lastY = y;
+    }
+
+    if (isZooming) {
+        int deltaY = y - lastY;
+
+        zoom += deltaY * 0.05f; // ズーム感度を調整
+
+        if (zoom > -1.0f)   zoom = -1.0f;   // ズームの最小値を制限
+        if (zoom < -100.0f) zoom = -100.0f; // ズームの最大値を制限
+
         lastY = y;
     }
 
     glutPostRedisplay(); // 再描画
 }
 
-// マウス ボタン イベント（ボタン押下）
+// マウス ボタン イベント
 void mouseButton(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            // 左ボタンが押された時、ドラッグ開始
-            isDragging = true;
-            lastY = y;
-        }
-        else if (state == GLUT_UP) {
-            // 左ボタンが離された時、ドラッグ終了
-            isDragging = false;
-        }
-    }
+    switch (button) {
+    case GLUT_LEFT_BUTTON:
 
-    if (state == GLUT_DOWN) {
-        lastX = x;
-        lastY = y;
+        // マウスの左ボタンでドラッグ開始/終了
+        switch (state) {
+        case GLUT_DOWN:
+            isChangePerspective = true;
+
+            lastX = x;
+            lastY = y;
+
+            break;
+
+        case GLUT_UP:
+            isChangePerspective = false;
+            break;
+        }
+
+        break;
+
+    case GLUT_RIGHT_BUTTON:
+
+        // マウスの右ボタンでズーム開始/終了
+        switch (state) {
+        case GLUT_DOWN:
+            isZooming = true;
+
+            lastY = y;
+
+            break;
+
+        case GLUT_UP:
+            isZooming = false;
+            break;
+        }
+
+        break;
     }
 }
 
@@ -362,9 +382,6 @@ void keyboard(unsigned char key, int x, int y) {
 
     case '0':
         exit(0);
-        break;
-
-    default:
         break;
     }
 }
