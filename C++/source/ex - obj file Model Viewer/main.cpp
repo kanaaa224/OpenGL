@@ -380,7 +380,7 @@ void keyboard(unsigned char key, int x, int y) {
         glutPostRedisplay();
         break;
 
-    case '0':
+    case 27: // ESC
         exit(0);
         break;
     }
